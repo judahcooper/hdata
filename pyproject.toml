@@ -1,7 +1,7 @@
 [tool]
 [tool.poetry]
 name = "hdata"
-version = "0.4.0"
+version = "0.5.0"
 homepage = "https://github.com/judahcooper/hdata"
 description = "Interacting with the HyperData API."
 authors = ["Judah Cooper <judah@hyperdata.network>"]
