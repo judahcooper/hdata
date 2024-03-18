@@ -4,6 +4,6 @@
 
 -   First release on PyPI
 
-## 0.4.0 (2024-03-18)
+## 0.6.0 (2024-03-18)
 
--   Added support for Python 3.11
+-   Added support for Python 3.11.
