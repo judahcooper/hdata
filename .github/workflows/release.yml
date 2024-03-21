@@ -43,17 +43,6 @@ jobs:
           python -m pip install --upgrade pip
           pip install poetry
 
-      - name: build documentation
-        run: |
-          poetry install -E doc
-          poetry run mkdocs build
-
-      - name: publish documentation
-        uses: peaceiris/actions-gh-pages@v3
-        with:
-          personal_token: ${{ secrets.PERSONAL_TOKEN }}
-          publish_dir: ./site
-
       - name: Build wheels and source tarball
         run: >-
           poetry build
@@ -67,4 +56,4 @@ jobs:
         with:
           user: __token__
           password: ${{ secrets.PYPI_API_TOKEN }}
-          skip_existing: true
+          skip-existing: true
