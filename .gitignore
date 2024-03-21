@@ -113,3 +113,7 @@ ENV/
 # mkdocs build dir
 site/
 .python-version
+
+# notebook
+tests/test.ipynb
+
