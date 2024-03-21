@@ -2,7 +2,7 @@
 
 __author__ = """Judah Cooper"""
 __email__ = 'judah@hyperdata.network'
-__version__ = '0.6.0'
+__version__ = '0.7.0'
 
 from .models import Source
 from .functions import transform
