@@ -8,13 +8,14 @@ import json
 import time
 
 
-def send(transformation_key: str, raw_data: str):
+def send(authentication_token: str, transformation_key: str, raw_data: str):
     """Send data to the transformation API"""
 
     url = 'https://api.hyperdata.network/transform'
     data = {"raw_data": raw_data}
     headers = {
         'Content-Type': 'application/json',
+        'Authorization': 'Bearer ' + authentication_token,
         'x-api-key': transformation_key
     }
 
@@ -24,11 +25,15 @@ def send(transformation_key: str, raw_data: str):
     return response
 
 
-def download(transformation_key: str, process_uuid: str):
+def download(authentication_token: str, transformation_key: str, process_uuid: str):
     """Download the transformed data"""
 
     params = {'process_uuid': process_uuid}
-    headers = {'x-api-key': transformation_key}
+    headers = {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer ' + authentication_token,
+        'x-api-key': transformation_key
+    }
     response = requests.get('https://api.hyperdata.network/download_output', params=params, headers=headers)
 
     output = requests.get(response.json()['data_url'], stream=True).json()
@@ -39,7 +44,7 @@ def download(transformation_key: str, process_uuid: str):
     return entity, attribute, record
 
 
-def transform(source: Source):
+def transform(source: Source, authentication_token: str):
     """Send data in chunks to the transformation API"""
 
     transformation_key = source.transformation_key
@@ -54,14 +59,15 @@ def transform(source: Source):
         if response.status_code != 200:
             print(f"Process failed at chunk {index} with response: {response.content}. Trying again in 20s.")
             time.sleep(20)
-            response = send(transformation_key, chunk)
+            response = send(authentication_token, transformation_key, chunk)
             if response.status_code != 200:
                 print(f"Process failed at chunk {index} with response: {response.content}. Exiting.")
                 return entity, attribute, record
         else:
             print(f"Process succeeded at chunk {index}.")
 
-            new_entity, new_attribute, new_record = download(transformation_key, response.json()['process_uuid'])
+            new_entity, new_attribute, new_record = download(
+                authentication_token, transformation_key, response.json()['process_uuid'])
 
             if entity.empty:
                 entity = pd.DataFrame(columns=new_entity.columns)
