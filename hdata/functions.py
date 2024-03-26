@@ -1,4 +1,5 @@
 from .models import Source
+from .force_validation import validate_output
 
 import base64
 import io
@@ -6,6 +7,7 @@ import pandas as pd
 import requests
 import json
 import time
+from typing import List
 
 
 def send(auth_token: str, transformation_key: str, raw_data: str):
@@ -44,7 +46,7 @@ def download(auth_token: str, transformation_key: str, process_uuid: str):
     return entity, attribute, record
 
 
-def transform(source: Source, auth_token: str):
+def apply_transformation(source: Source, auth_token: str):
     """Send data in chunks to the transformation API"""
 
     transformation_key = source.transformation_key
@@ -79,5 +81,38 @@ def transform(source: Source, auth_token: str):
             entity = pd.concat([entity, new_entity], ignore_index=True, sort=False)
             attribute = pd.concat([attribute, new_attribute], ignore_index=True, sort=False)
             record = pd.concat([record, new_record], ignore_index=True, sort=False)
+
+    return entity, attribute, record
+
+
+def transform(sources: List[Source], auth_token: str):
+    """Apply transformation to the source data"""
+
+    entity = pd.DataFrame()
+    attribute = pd.DataFrame()
+    record = pd.DataFrame()
+
+    # Check if the sources are valid Source objects
+    for source in sources:
+        if not isinstance(source, Source):
+            raise ValueError("Invalid source object. Use the hdata.Source class.")
+
+    # Apply transformation to each source
+    for source in sources:
+        new_entity, new_attribute, new_record = apply_transformation(source, auth_token)
+
+        if entity.empty:
+            entity = pd.DataFrame(columns=new_entity.columns)
+        if attribute.empty:
+            attribute = pd.DataFrame(columns=new_attribute.columns)
+        if record.empty:
+            record = pd.DataFrame(columns=new_record.columns)
+
+        entity = pd.concat([entity, new_entity], ignore_index=True, sort=False)
+        attribute = pd.concat([attribute, new_attribute], ignore_index=True, sort=False)
+        record = pd.concat([record, new_record], ignore_index=True, sort=False)
+
+    # Validate the output
+    entity, attribute, record = validate_output(entity, attribute, record)
 
     return entity, attribute, record

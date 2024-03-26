@@ -26,6 +26,10 @@ class Source:
                     return pd.read_csv(self.data_input)
                 elif file_extension in ['.parquet']:
                     return pd.read_parquet(self.data_input)
+                elif file_extension in ['.xlsx']:
+                    return pd.read_excel(self.data_input)
+                elif file_extension in ['.json']:
+                    return pd.read_json(self.data_input)
                 else:
                     raise ValueError("Unsupported file format.")
             else:
