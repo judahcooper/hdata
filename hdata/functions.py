@@ -13,7 +13,7 @@ from typing import List
 def send(auth_token: str, transformation_key: str, raw_data: str):
     """Send data to the transformation API"""
 
-    url = 'https://api.hyperdata.network/transform'
+    url = 'https://api.hyperdata.so/transform'
     data = {"raw_data": raw_data}
     headers = {
         'Content-Type': 'application/json',
@@ -36,7 +36,7 @@ def download(auth_token: str, transformation_key: str, process_uuid: str):
         'Authorization': 'Bearer ' + auth_token,
         'x-api-key': transformation_key
     }
-    response = requests.get('https://api.hyperdata.network/download_output', params=params, headers=headers)
+    response = requests.get('https://api.hyperdata.so/download_output', params=params, headers=headers)
 
     output = requests.get(response.json()['data_url'], stream=True).json()
 
