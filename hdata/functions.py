@@ -1,4 +1,4 @@
-from .models import Source
+from .models import Source, Output
 from .force_validation import validate_output
 
 import base64
@@ -122,4 +122,4 @@ def transform(sources: List[Source], auth_token: str):
     # Validate the output
     entity, attribute, record = validate_output(entity, attribute, record)
 
-    return entity, attribute, record
+    return Output(entity, attribute, record)
