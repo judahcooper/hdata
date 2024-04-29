@@ -6,6 +6,7 @@ import re
 
 
 def column_validation(entity: pd.DataFrame, attribute: pd.DataFrame, record: pd.DataFrame):
+
     # Convert all column names to lower case
     entity.columns = entity.columns.str.lower()
     attribute.columns = attribute.columns.str.lower()

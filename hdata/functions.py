@@ -2,6 +2,7 @@ from .models import Source
 from .force_validation import validate_output
 
 import base64
+import uuid
 import io
 import pandas as pd
 import requests
@@ -10,11 +11,14 @@ import time
 from typing import List
 
 
-def send(auth_token: str, transformation_key: str, raw_data: str):
+def send(auth_token: str, transformation_key: str, raw_data: str, job_uuid: str):
     """Send data to the transformation API"""
 
     url = 'https://api.hyperdata.so/transform'
-    data = {"raw_data": raw_data}
+    data = {
+        "raw_data": raw_data,
+        "job_uuid": job_uuid
+    }
     headers = {
         'Content-Type': 'application/json',
         'Authorization': 'Bearer ' + auth_token,
@@ -46,7 +50,7 @@ def download(auth_token: str, transformation_key: str, process_uuid: str):
     return entity, attribute, record
 
 
-def apply_transformation(source: Source, auth_token: str):
+def apply_transformation(source: Source, auth_token: str, job_uuid: str):
     """Send data in chunks to the transformation API"""
 
     transformation_key = source.transformation_key
@@ -56,7 +60,7 @@ def apply_transformation(source: Source, auth_token: str):
 
     for index, chunk in enumerate(source.zipped_chunks):
 
-        response = send(auth_token, transformation_key, chunk)
+        response = send(auth_token, transformation_key, chunk, job_uuid)
 
         if response.status_code != 200:
             print(f"Process failed at chunk {index} with response: {response.content}. Trying again in 20s.")
@@ -92,6 +96,9 @@ def transform(sources: List[Source], auth_token: str):
     attribute = pd.DataFrame()
     record = pd.DataFrame()
 
+    # Initialize the job uuid
+    job_uuid = str(uuid.uuid4())
+
     # Check if the sources are valid Source objects
     for source in sources:
         if not isinstance(source, Source):
@@ -99,7 +106,7 @@ def transform(sources: List[Source], auth_token: str):
 
     # Apply transformation to each source
     for source in sources:
-        new_entity, new_attribute, new_record = apply_transformation(source, auth_token)
+        new_entity, new_attribute, new_record = apply_transformation(source, auth_token, job_uuid)
 
         if entity.empty:
             entity = pd.DataFrame(columns=new_entity.columns)
